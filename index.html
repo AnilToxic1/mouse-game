@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شمارنده امتیاز موبایلی</title>
+<link href="https://fonts.googleapis.com/css?family=Markazi+Text" rel="stylesheet">
+
+<style>
+*{
+  font-family:'Markazi Text',serif;
+  box-sizing:border-box;
+  direction:rtl;
+}
+
+body{
+  margin:0;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:linear-gradient(135deg,#141e30,#4b6cb7);
+  color:white;
+}
+
+.container{
+  width:100%;
+  max-width:420px;
+  padding:20px;
+  text-align:center;
+}
+
+h1{
+  margin-bottom:20px;
+  font-size:1.8em;
+}
+
+.players{
+  display:flex;
+  gap:20px;
+  justify-content:center;
+}
+
+.player{
+  flex:1;
+  background:rgba(255,255,255,.15);
+  padding:15px;
+  border-radius:16px;
+  transition:.3s;
+}
+
+.score{
+  font-size:3.2em;
+  margin:10px 0;
+}
+
+button{
+  width:100%;
+  padding:14px;
+  margin-top:10px;
+  border:none;
+  border-radius:12px;
+  font-size:1.2em;
+  background:#2980b9;
+  color:white;
+}
+
+button:active{
+  transform:scale(.97);
+  background:#4aa3df;
+}
+
+#winner{
+  margin-top:15px;
+  font-size:1.2em;
+  color:#f1c40f;
+  min-height:30px;
+}
+
+#reset{
+  margin-top:15px;
+  background:#e74c3c;
+}
+
+.winner{
+  box-shadow:0 0 20px #f1c40f;
+}
+
+/* ذرات */
+.particle{
+  position:absolute;
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  animation:fly .7s forwards;
+}
+
+@keyframes fly{
+  to{
+    opacity:0;
+    transform:translate(var(--x),-50px);
+  }
+}
+
+/* 📱 موبایل */
+@media (max-width:600px){
+  .players{
+    flex-direction:column;
+  }
+
+  .score{
+    font-size:3.5em;
+  }
+
+  h1{
+    font-size:1.6em;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🎮 شمارنده امتیاز</h1>
+
+<div class="players">
+  <div class="player" id="p1">
+    <h3>بازیکن ۱</h3>
+    <div class="score" id="s1">0</div>
+    <button onclick="add(1)">+۱</button>
+  </div>
+
+  <div class="player" id="p2">
+    <h3>بازیکن ۲</h3>
+    <div class="score" id="s2">0</div>
+    <button onclick="add(2)">+۱</button>
+  </div>
+</div>
+
+<div id="winner"></div>
+
+<button id="reset" onclick="resetGame()">ریست</button>
+
+<!-- صداها -->
+<audio id="sound1" src="sounds/player1.mp3"></audio>
+<audio id="sound2" src="sounds/player2.mp3"></audio>
+<audio id="soundReset" src="sounds/reset.mp3"></audio>
+<audio id="soundWin" src="sounds/win.mp3"></audio>
+
+</div>
+
+<script>
+let s1=0,s2=0;
+let currentWinner=0;
+
+const snd1=document.getElementById("sound1");
+const snd2=document.getElementById("sound2");
+const sndR=document.getElementById("soundReset");
+const sndW=document.getElementById("soundWin");
+
+function play(s){
+  s.currentTime=0;
+  s.play();
+}
+
+function add(p){
+  if(p===1){
+    s1++;
+    play(snd1);
+    update("s1",s1,1);
+  }else{
+    s2++;
+    play(snd2);
+    update("s2",s2,2);
+  }
+  checkWinner();
+}
+
+function update(id,val,player){
+  const el=document.getElementById(id);
+  el.innerText=val;
+  createParticles(el,player);
+}
+
+function resetGame(){
+  s1=s2=0;
+  currentWinner=0;
+  document.getElementById("s1").innerText=0;
+  document.getElementById("s2").innerText=0;
+  document.getElementById("winner").innerText="";
+  document.getElementById("p1").classList.remove("winner");
+  document.getElementById("p2").classList.remove("winner");
+  play(sndR);
+}
+
+function checkWinner(){
+  const w=document.getElementById("winner");
+  if(s1>s2 && currentWinner!==1){
+    currentWinner=1;
+    play(sndW);
+    w.innerText="🏆 بازیکن ۱ جلو است";
+    p1.classList.add("winner");
+    p2.classList.remove("winner");
+  }
+  else if(s2>s1 && currentWinner!==2){
+    currentWinner=2;
+    play(sndW);
+    w.innerText="🏆 بازیکن ۲ جلو است";
+    p2.classList.add("winner");
+    p1.classList.remove("winner");
+  }
+  else if(s1===s2){
+    currentWinner=0;
+    w.innerText="";
+    p1.classList.remove("winner");
+    p2.classList.remove("winner");
+  }
+}
+
+function createParticles(el,player){
+  for(let i=0;i<6;i++){
+    const p=document.createElement("div");
+    p.className="particle";
+    p.style.background=player===1?"#f39c12":"#1abc9c";
+    p.style.left=Math.random()*el.offsetWidth+"px";
+    p.style.setProperty("--x",(Math.random()*40-20)+"px");
+    el.appendChild(p);
+    setTimeout(()=>p.remove(),700);
+  }
+}
+</script>
+
+</body>
+</html>
